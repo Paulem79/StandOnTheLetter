@@ -1,6 +1,6 @@
 package net.paulem.sotl.fabric.logger;
 
-import net.paulem.sotl.common.logger.LoggerWrapper;
+import net.paulem.sotl.common.wrapper.LoggerWrapper;
 import org.slf4j.Logger;
 
 public record FabricLoggerWrapper(Logger logger) implements LoggerWrapper {

@@ -79,7 +79,7 @@ public class DestroyingState implements DestructionState<FabricDestructionContex
             currentY--;
         }
 
-        return new WaitingState(20 * 10);
+        return new FabricWaitingState(20 * 10);
     }
 
     private boolean doDeleteBlock(BlockState state, String letter) {

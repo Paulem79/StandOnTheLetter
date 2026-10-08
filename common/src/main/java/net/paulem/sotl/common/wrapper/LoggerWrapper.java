@@ -1,4 +1,4 @@
-package net.paulem.sotl.common.logger;
+package net.paulem.sotl.common.wrapper;
 
 public interface LoggerWrapper {
     void info(String msg);

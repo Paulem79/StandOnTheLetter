@@ -7,7 +7,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Blocks;
 import net.paulem.sotl.common.SOTL;
-import net.paulem.sotl.common.logger.LoggerWrapper;
+import net.paulem.sotl.common.wrapper.LoggerWrapper;
 import net.paulem.sotl.common.utils.AlphabetUtils;
 import net.paulem.sotl.fabric.logger.FabricLoggerWrapper;
 import net.paulem.sotl.fabric.scheduler.LetterChooseScheduler;

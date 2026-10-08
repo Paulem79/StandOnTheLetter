@@ -73,7 +73,7 @@ public class DestroyingState implements DestructionState<PaperDestructionContext
         }
 
         // Wait 10 seconds (20 ticks/sec * 10) before restoring
-        return new WaitingState(20 * 10);
+        return new PaperWaitingState(20 * 10);
     }
 
     private boolean doDeleteBlock(Material blockType, String letter) {

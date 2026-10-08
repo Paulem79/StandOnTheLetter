@@ -1,7 +1,7 @@
 package net.paulem.sotl.paper;
 
 import net.paulem.sotl.common.SOTL;
-import net.paulem.sotl.common.logger.LoggerWrapper;
+import net.paulem.sotl.common.wrapper.LoggerWrapper;
 import net.paulem.sotl.common.utils.AlphabetUtils;
 import net.paulem.sotl.paper.logger.PaperLoggerWrapper;
 import net.paulem.sotl.paper.scheduler.LetterChooseScheduler;

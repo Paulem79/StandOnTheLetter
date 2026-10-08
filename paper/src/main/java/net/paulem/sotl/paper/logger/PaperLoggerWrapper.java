@@ -1,6 +1,6 @@
 package net.paulem.sotl.paper.logger;
 
-import net.paulem.sotl.common.logger.LoggerWrapper;
+import net.paulem.sotl.common.wrapper.LoggerWrapper;
 
 import java.util.logging.Logger;
 
