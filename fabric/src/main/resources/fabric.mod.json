@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "sotl",
+  "version": "1.0.0",
+  "name": "StandOnTheLetter",
+  "icon": "assets/sotl/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "net.paulem.sotl.fabric.FabricSOTL"
+    ]
+  },
+  "mixins": [
+  ],
+  "depends": {
+    "fabricloader": "*",
+    "minecraft": "~26.3",
+    "java": "*",
+    "fabric-api": "*"
+  }
+}

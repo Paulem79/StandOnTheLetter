@@ -35,6 +35,8 @@ tasks.shadowJar {
     from(project(":paper").sourceSets.main.get().output)
     from(project(":fabric").sourceSets.main.get().output)
 
+    configurations = emptyList()
+
     mergeServiceFiles()
 }
 

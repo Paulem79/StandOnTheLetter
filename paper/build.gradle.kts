@@ -10,6 +10,10 @@ dependencies {
 
 
 tasks {
+    jar {
+        from(project(":common").sourceSets.main.get().output)
+    }
+
     runServer {
         minecraftVersion("26.3")
     }

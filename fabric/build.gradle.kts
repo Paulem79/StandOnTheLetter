@@ -7,8 +7,8 @@ dependencies {
     implementation(project(":common"))
 
     minecraft("com.mojang:minecraft:26.3")
-    compileOnly("net.fabricmc:fabric-loader:0.16.9")
-    compileOnly("net.fabricmc.fabric-api:fabric-api:0.161.0+26.3")
+    implementation("net.fabricmc:fabric-loader:0.19.5")
+    implementation("net.fabricmc.fabric-api:fabric-api:0.162.0+26.3")
 }
 
 tasks.processResources {
@@ -17,3 +17,4 @@ tasks.processResources {
         expand("version" to project.version)
     }
 }
+
