@@ -9,6 +9,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.ValueInput;
 import net.paulem.sotl.common.destruction.state.DestructionState;
+import net.paulem.sotl.common.destruction.state.RestoringState;
 import net.paulem.sotl.fabric.destruction.FabricDestructionContext;
 import net.paulem.sotl.fabric.destruction.model.FabricDestroyedBlock;
 import net.paulem.sotl.fabric.destruction.model.FabricStoredEntity;
@@ -16,23 +17,7 @@ import net.paulem.sotl.fabric.utils.ContainerUtils;
 
 import java.util.List;
 
-public class RestoringState implements DestructionState<FabricDestructionContext> {
-    private int blockIndex = -1;
-    private int entityIndex = -1;
-    private boolean initialized = false;
-
-    @Override
-    public void enter(FabricDestructionContext context) {
-        initIndices(context);
-    }
-
-    private void initIndices(FabricDestructionContext context) {
-        if (!initialized) {
-            this.blockIndex = context.getDestroyedBlocks().size() - 1;
-            this.entityIndex = context.getStoredEntities().size() - 1;
-            this.initialized = true;
-        }
-    }
+public class FabricRestoringState extends RestoringState<FabricDestructionContext> {
 
     @Override
     public DestructionState<FabricDestructionContext> tick(FabricDestructionContext context, long startTime) {

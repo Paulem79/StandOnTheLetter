@@ -2,17 +2,17 @@ package net.paulem.sotl.fabric.scheduler;
 
 import net.paulem.sotl.fabric.destruction.FabricDestructionContext;
 import net.paulem.sotl.common.destruction.state.DestructionState;
-import net.paulem.sotl.fabric.destruction.state.PreparationState;
+import net.paulem.sotl.fabric.destruction.state.FabricPreparationState;
 import net.minecraft.server.level.ServerLevel;
 
-public final class DestroyScheduler {
+public final class FabricDestroyScheduler {
     private final FabricDestructionContext context;
-    private DestructionState currentState;
+    private DestructionState<FabricDestructionContext> currentState;
     private boolean finished = false;
 
-    public DestroyScheduler(ServerLevel world, char letter) {
+    public FabricDestroyScheduler(ServerLevel world, char letter) {
         this.context = new FabricDestructionContext(world, letter);
-        this.currentState = new PreparationState();
+        this.currentState = new FabricPreparationState();
     }
 
     public boolean tick() {

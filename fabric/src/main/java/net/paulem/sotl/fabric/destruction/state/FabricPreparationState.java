@@ -20,7 +20,7 @@ import net.paulem.sotl.fabric.utils.ChunkUtils;
 
 import java.util.List;
 
-public class PreparationState implements DestructionState<FabricDestructionContext> {
+public class FabricPreparationState implements DestructionState<FabricDestructionContext> {
 
     @Override
     public DestructionState<FabricDestructionContext> tick(FabricDestructionContext context, long startTime) {
@@ -59,7 +59,7 @@ public class PreparationState implements DestructionState<FabricDestructionConte
             storeAndRemoveEntities(chunk, context);
         }
 
-        return new DestroyingState();
+        return new FabricDestroyingState();
     }
 
     private void storeAndRemoveEntities(LevelChunk chunk, FabricDestructionContext context) {

@@ -1,6 +1,7 @@
 package net.paulem.sotl.paper.destruction.state;
 
 import net.paulem.sotl.common.destruction.state.DestructionState;
+import net.paulem.sotl.common.destruction.state.RestoringState;
 import net.paulem.sotl.paper.destruction.PaperDestructionContext;
 import net.paulem.sotl.paper.destruction.model.PaperDestroyedBlock;
 import net.paulem.sotl.paper.destruction.model.PaperStoredEntity;
@@ -8,23 +9,7 @@ import net.paulem.sotl.paper.utils.ContainerUtils;
 
 import java.util.List;
 
-public class RestoringState implements DestructionState<PaperDestructionContext> {
-    private int blockIndex = -1;
-    private int entityIndex = -1;
-    private boolean initialized = false;
-
-    @Override
-    public void enter(PaperDestructionContext context) {
-        initIndices(context);
-    }
-
-    private void initIndices(PaperDestructionContext context) {
-        if (!initialized) {
-            this.blockIndex = context.getDestroyedBlocks().size() - 1;
-            this.entityIndex = context.getStoredEntities().size() - 1;
-            this.initialized = true;
-        }
-    }
+public class PaperRestoringState extends RestoringState<PaperDestructionContext> {
 
     @Override
     public DestructionState<PaperDestructionContext> tick(PaperDestructionContext context, long startTime) {

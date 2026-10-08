@@ -23,13 +23,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-public class LetterChooseScheduler {
+public class FabricLetterChooseScheduler {
     private final Map<ResourceKey<Level>, Random> randoms = new HashMap<>();
     private final Map<ResourceKey<Level>, Character> lastChar = new HashMap<>();
 
     private final List<ActiveRoll> activeRolls = new ArrayList<>();
     private final List<DelayedDestroy> delayedDestroys = new ArrayList<>();
-    private final List<DestroyScheduler> activeDestroys = new ArrayList<>();
+    private final List<FabricDestroyScheduler> activeDestroys = new ArrayList<>();
 
     public void run(MinecraftServer server) {
         for (ServerLevel world : server.getAllLevels()) {
@@ -62,13 +62,13 @@ public class LetterChooseScheduler {
             DelayedDestroy delayed = delayedIterator.next();
             if (delayed.tick()) {
                 delayedIterator.remove();
-                activeDestroys.add(new DestroyScheduler(delayed.world, delayed.letter));
+                activeDestroys.add(new FabricDestroyScheduler(delayed.world, delayed.letter));
             }
         }
 
-        Iterator<DestroyScheduler> destroyIterator = activeDestroys.iterator();
+        Iterator<FabricDestroyScheduler> destroyIterator = activeDestroys.iterator();
         while (destroyIterator.hasNext()) {
-            DestroyScheduler destroy = destroyIterator.next();
+            FabricDestroyScheduler destroy = destroyIterator.next();
             if (destroy.tick()) {
                 destroyIterator.remove();
             }

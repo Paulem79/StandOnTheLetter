@@ -4,7 +4,7 @@ import net.paulem.sotl.common.SOTL;
 import net.paulem.sotl.common.wrapper.LoggerWrapper;
 import net.paulem.sotl.common.utils.AlphabetUtils;
 import net.paulem.sotl.paper.logger.PaperLoggerWrapper;
-import net.paulem.sotl.paper.scheduler.LetterChooseScheduler;
+import net.paulem.sotl.paper.scheduler.PaperLetterChooseScheduler;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -24,7 +24,7 @@ public class PaperSOTL extends JavaPlugin implements SOTL<PaperSOTL> {
 
         initLetterWeights();
 
-        Bukkit.getScheduler().runTaskTimer(this, new LetterChooseScheduler(), 0L, 20L * 60);
+        Bukkit.getScheduler().runTaskTimer(this, new PaperLetterChooseScheduler(), 0L, 20L * 60);
 
         super.onEnable();
     }

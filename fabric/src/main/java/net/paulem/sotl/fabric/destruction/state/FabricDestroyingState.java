@@ -14,7 +14,7 @@ import net.paulem.sotl.fabric.utils.ContainerUtils;
 
 import java.util.List;
 
-public class DestroyingState implements DestructionState<FabricDestructionContext> {
+public class FabricDestroyingState implements DestructionState<FabricDestructionContext> {
     private int currentY;
     private int currentChunkIndex = 0;
     private int x = 0;

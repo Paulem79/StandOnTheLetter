@@ -2,7 +2,7 @@ package net.paulem.sotl.common.destruction.state;
 
 import net.paulem.sotl.common.destruction.DestructionContext;
 
-public interface DestructionState<C extends DestructionContext> {
+public interface DestructionState<C extends DestructionContext<?, ?, ?, ?>> {
 
     /**
      * Called once when this state is entered.

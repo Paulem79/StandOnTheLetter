@@ -2,17 +2,17 @@ package net.paulem.sotl.paper.scheduler;
 
 import net.paulem.sotl.common.destruction.state.DestructionState;
 import net.paulem.sotl.paper.destruction.PaperDestructionContext;
-import net.paulem.sotl.paper.destruction.state.PreparationState;
+import net.paulem.sotl.paper.destruction.state.PaperPreparationState;
 import org.bukkit.World;
 import org.bukkit.scheduler.BukkitRunnable;
 
-public final class DestroyScheduler extends BukkitRunnable {
+public final class PaperDestroyScheduler extends BukkitRunnable {
     private final PaperDestructionContext context;
     private DestructionState<PaperDestructionContext> currentState;
 
-    public DestroyScheduler(World world, char letter) {
+    public PaperDestroyScheduler(World world, char letter) {
         this.context = new PaperDestructionContext(world, letter);
-        this.currentState = new PreparationState();
+        this.currentState = new PaperPreparationState();
     }
 
     @Override

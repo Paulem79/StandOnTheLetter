@@ -11,7 +11,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 
-public class DestroyingState implements DestructionState<PaperDestructionContext> {
+public class PaperDestroyingState implements DestructionState<PaperDestructionContext> {
     private int currentY;
     private int currentChunkIndex = 0;
     private int x = 0;

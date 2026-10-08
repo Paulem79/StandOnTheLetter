@@ -11,6 +11,6 @@ public class FabricWaitingState extends WaitingState<FabricDestructionContext> {
 
     @Override
     public DestructionState<FabricDestructionContext> getNextState() {
-        return new RestoringState();
+        return new FabricRestoringState();
     }
 }

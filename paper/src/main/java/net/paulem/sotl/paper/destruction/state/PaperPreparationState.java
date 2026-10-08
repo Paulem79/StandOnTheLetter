@@ -13,7 +13,7 @@ import org.bukkit.entity.Player;
 
 import java.util.List;
 
-public class PreparationState implements DestructionState<PaperDestructionContext> {
+public class PaperPreparationState implements DestructionState<PaperDestructionContext> {
 
     @Override
     public DestructionState<PaperDestructionContext> tick(PaperDestructionContext context, long startTime) {
@@ -46,7 +46,7 @@ public class PreparationState implements DestructionState<PaperDestructionContex
             storeAndRemoveEntities(chunk, context);
         }
 
-        return new DestroyingState();
+        return new PaperDestroyingState();
     }
 
     private void storeAndRemoveEntities(Chunk chunk, PaperDestructionContext context) {

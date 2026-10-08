@@ -10,7 +10,7 @@ import net.paulem.sotl.common.SOTL;
 import net.paulem.sotl.common.wrapper.LoggerWrapper;
 import net.paulem.sotl.common.utils.AlphabetUtils;
 import net.paulem.sotl.fabric.logger.FabricLoggerWrapper;
-import net.paulem.sotl.fabric.scheduler.LetterChooseScheduler;
+import net.paulem.sotl.fabric.scheduler.FabricLetterChooseScheduler;
 import org.slf4j.LoggerFactory;
 
 import java.util.stream.StreamSupport;
@@ -20,7 +20,7 @@ public class FabricSOTL implements ModInitializer, SOTL<FabricSOTL> {
 
     private static FabricSOTL instance;
     private final LoggerWrapper loggerWrapper = new FabricLoggerWrapper(LoggerFactory.getLogger(MOD_ID));
-    private final LetterChooseScheduler letterChooseScheduler = new LetterChooseScheduler();
+    private final FabricLetterChooseScheduler letterChooseScheduler = new FabricLetterChooseScheduler();
     private int ticks = 0;
 
     @Override

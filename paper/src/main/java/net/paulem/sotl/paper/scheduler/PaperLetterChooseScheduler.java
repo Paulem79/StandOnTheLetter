@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
-public class LetterChooseScheduler implements Runnable {
+public class PaperLetterChooseScheduler implements Runnable {
     private final Map<UUID, Random> randoms = new HashMap<>();
     private final Map<UUID, Character> lastChar = new HashMap<>();
 
@@ -61,7 +61,7 @@ public class LetterChooseScheduler implements Runnable {
         char letter = lastChar.get(world.getUID());
 
         showFinalLetter(world, letter);
-        new DestroyScheduler(world, letter).runTaskTimer(PaperSOTL.getInstance(), 20L * 10, 1L);
+        new PaperDestroyScheduler(world, letter).runTaskTimer(PaperSOTL.getInstance(), 20L * 10, 1L);
     }
 
     private void showFinalLetter(World world, char letter) {

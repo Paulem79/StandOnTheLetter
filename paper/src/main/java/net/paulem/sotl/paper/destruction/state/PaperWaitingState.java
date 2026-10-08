@@ -11,6 +11,6 @@ public class PaperWaitingState extends WaitingState<PaperDestructionContext> {
 
     @Override
     public DestructionState<PaperDestructionContext> getNextState() {
-        return new RestoringState();
+        return new PaperRestoringState();
     }
 }
