@@ -4,6 +4,30 @@
   "version": "${version}",
   "name": "StandOnTheLetter",
   "description": "${description}",
+  "authors": [
+    {
+      "name": "Paulem",
+      "contact": {
+        "homepage": "https://paulem.net"
+      }
+    }
+  ],
+  "contact": {
+    "homepage": "https://modrinth.com/project/sotl",
+    "sources": "https://github.com/Paulem79/StandOnTheLetter",
+    "issues": "https://github.com/Paulem79/StandOnTheLetter/issues",
+    "website": "https://paulem.net",
+    "kofi": "https://ko-fi.com/paulem"
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.modrinth": "https://modrinth.com/project/sotl",
+        "modmenu.kofi": "https://ko-fi.com/paulem"
+      }
+    }
+  },
+  "license": "CC-BY-NC-4.0",
   "icon": "assets/sotl/icon.png",
   "environment": "*",
   "entrypoints": {
