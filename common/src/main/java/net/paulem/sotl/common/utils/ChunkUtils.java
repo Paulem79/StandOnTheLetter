@@ -12,6 +12,11 @@ public final class ChunkUtils {
         K get(int chunkX, int chunkZ);
     }
 
+    /** Unique key of a chunk from its coordinates. */
+    public static long chunkKey(int chunkX, int chunkZ) {
+        return (chunkX & 0xFFFFFFFFL) | (chunkZ & 0xFFFFFFFFL) << 32;
+    }
+
     /** Returns the (2 * radius + 1)² chunks centered on the given chunk coordinates. */
     public static <K> List<K> getChunksAround(int centerX, int centerZ, int radius, ChunkGetter<K> getter) {
         List<K> chunks = new ArrayList<>();

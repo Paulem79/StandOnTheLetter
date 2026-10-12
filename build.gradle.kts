@@ -1,3 +1,6 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.gradle.api.tasks.bundling.AbstractArchiveTask
+
 plugins {
     java
     id("com.gradleup.shadow") version "9.+"
@@ -28,6 +31,7 @@ dependencies {
     implementation(project(":fabric"))
 }
 
+// Paper (1.21.x and 26.x) + Fabric 26.x
 tasks.shadowJar {
     archiveClassifier.set("")
 
@@ -40,6 +44,22 @@ tasks.shadowJar {
     mergeServiceFiles()
 }
 
+// Paper (1.21.x and 26.x) + Fabric 1.21.x, which is obfuscated and runs on Java 21
+val legacyShadowJar by tasks.registering(ShadowJar::class) {
+    val legacyRemapJar = project(":fabric-legacy").tasks.named<AbstractArchiveTask>("remapJar")
+    dependsOn(legacyRemapJar)
+
+    archiveClassifier.set("mc1.21")
+
+    from(project(":common").sourceSets.main.get().output)
+    from(project(":paper").sourceSets.main.get().output)
+    from(legacyRemapJar.map { zipTree(it.archiveFile) })
+
+    configurations = emptyList()
+
+    mergeServiceFiles()
+}
+
 tasks.build {
-    dependsOn(tasks.shadowJar)
+    dependsOn(tasks.shadowJar, legacyShadowJar)
 }

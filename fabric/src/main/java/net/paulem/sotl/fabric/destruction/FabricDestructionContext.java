@@ -34,13 +34,17 @@ import net.paulem.sotl.fabric.utils.ContainerUtils;
 import java.util.List;
 
 public class FabricDestructionContext extends DestructionContext<ServerLevel, LevelChunk, FabricDestroyedBlock, FabricStoredEntity> {
+    /** Sends the change to the clients without any side effect: no neighbor update, no drop, no falling block. */
+    private static final int SILENT_UPDATE = Block.UPDATE_CLIENTS | Block.UPDATE_SKIP_ALL_SIDEEFFECTS;
+
     public FabricDestructionContext(ServerLevel world, char letter) {
         super(world, letter);
     }
 
     @Override
     public long chunkKey(LevelChunk chunk) {
-        return chunk.getPos().pack();
+        ChunkPos pos = chunk.getPos();
+        return ChunkUtils.chunkKey(pos.getMinBlockX() >> 4, pos.getMinBlockZ() >> 4);
     }
 
     @Override
@@ -65,6 +69,7 @@ public class FabricDestructionContext extends DestructionContext<ServerLevel, Le
     @Override
     public List<PlayerArea<LevelChunk>> collectPlayerAreas() {
         return getWorld().players().stream()
+                .filter(player -> !player.isSpectator())
                 .map(player -> new PlayerArea<>(
                         Math.min(topY(), player.getBlockY() + SOTLSettings.PLAYER_HEIGHT_MARGIN),
                         chunksAround(player)
@@ -73,8 +78,7 @@ public class FabricDestructionContext extends DestructionContext<ServerLevel, Le
     }
 
     private List<LevelChunk> chunksAround(ServerPlayer player) {
-        ChunkPos center = player.chunkPosition();
-        return ChunkUtils.getChunksAround(center.x(), center.z(), SOTLSettings.PLAYER_CHUNK_RADIUS,
+        return ChunkUtils.getChunksAround(player.getBlockX() >> 4, player.getBlockZ() >> 4, SOTLSettings.PLAYER_CHUNK_RADIUS,
                 (x, z) -> getWorld().getChunk(x, z));
     }
 
@@ -105,12 +109,12 @@ public class FabricDestructionContext extends DestructionContext<ServerLevel, Le
 
         List<ItemStack> contents = ContainerUtils.captureAndClearContainer(getWorld(), pos);
         getDestroyedBlocks().add(new FabricDestroyedBlock(pos.immutable(), state, contents));
-        getWorld().setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
+        getWorld().setBlock(pos, Blocks.AIR.defaultBlockState(), SILENT_UPDATE);
     }
 
     @Override
     public void restoreBlock(FabricDestroyedBlock block) {
-        getWorld().setBlock(block.pos(), block.state(), Block.UPDATE_ALL);
+        getWorld().setBlock(block.pos(), block.state(), SILENT_UPDATE);
         ContainerUtils.restoreContainer(getWorld(), block.pos(), block.contents());
     }
 

@@ -10,6 +10,7 @@ import net.paulem.sotl.paper.destruction.model.PaperDestroyedBlock;
 import net.paulem.sotl.paper.destruction.model.PaperStoredEntity;
 import net.paulem.sotl.paper.utils.ContainerUtils;
 import org.bukkit.Chunk;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -47,6 +48,7 @@ public class PaperDestructionContext extends DestructionContext<World, Chunk, Pa
     @Override
     public List<PlayerArea<Chunk>> collectPlayerAreas() {
         return getWorld().getPlayers().stream()
+                .filter(player -> player.getGameMode() != GameMode.SPECTATOR)
                 .map(player -> new PlayerArea<>(
                         Math.min(topY(), player.getLocation().getBlockY() + SOTLSettings.PLAYER_HEIGHT_MARGIN),
                         chunksAround(player)

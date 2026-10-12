@@ -8,5 +8,6 @@ pluginManagement {
 rootProject.name = "StandOnTheLetter"
 
 include("fabric")
+include("fabric-legacy")
 include("paper")
 include("common")

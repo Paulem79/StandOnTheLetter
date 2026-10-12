@@ -21,4 +21,11 @@ public final class SOTLSettings {
     public static final int PLAYER_CHUNK_RADIUS = 1;
     /** Blocks above the feet of a player that are still destroyed. */
     public static final int PLAYER_HEIGHT_MARGIN = 2;
+
+    /** Blocks below the feet of a player scanned to pick the letter. */
+    public static final int SURVEY_DEPTH = 24;
+    /** How much rarer blocks are favored: a block weighs 1 / count^exponent. */
+    public static final double RARITY_EXPONENT = 0.5;
+    /** Weight multiplier of a block a player has in their inventory. */
+    public static final double INVENTORY_WEIGHT_MULTIPLIER = 1.1;
 }

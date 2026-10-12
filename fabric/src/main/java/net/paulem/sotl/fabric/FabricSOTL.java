@@ -4,7 +4,6 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Blocks;
 import net.paulem.sotl.common.SOTL;
 import net.paulem.sotl.common.wrapper.LoggerWrapper;
@@ -40,8 +39,7 @@ public class FabricSOTL implements ModInitializer, SOTL<FabricSOTL> {
         AlphabetUtils.computeAndSetWeights(
                 StreamSupport.stream(BuiltInRegistries.BLOCK.spliterator(), false)
                         .filter(block -> block != Blocks.AIR)
-                        .map(BuiltInRegistries.BLOCK::getKey)
-                        .map(Identifier::getPath)
+                        .map(block -> BuiltInRegistries.BLOCK.getKey(block).getPath())
                         .toList(),
                 path -> path,
                 AlphabetUtils.DEFAULT_MIN_BLOCK_COUNT

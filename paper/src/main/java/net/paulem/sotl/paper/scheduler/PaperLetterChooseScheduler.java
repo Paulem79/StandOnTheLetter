@@ -5,14 +5,23 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
 import net.paulem.sotl.common.destruction.DestructionRunner;
+import net.paulem.sotl.common.scheduler.BlockSurvey;
 import net.paulem.sotl.common.scheduler.LetterChooseScheduler;
 import net.paulem.sotl.common.scheduler.LetterDisplay;
+import net.paulem.sotl.common.scheduler.SurveyRegion;
 import net.paulem.sotl.paper.destruction.PaperDestructionContext;
 import org.bukkit.Bukkit;
+import org.bukkit.ChunkSnapshot;
+import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class PaperLetterChooseScheduler extends LetterChooseScheduler<World, UUID> {
@@ -30,6 +39,44 @@ public class PaperLetterChooseScheduler extends LetterChooseScheduler<World, UUI
     @Override
     protected long worldSeed(World world) {
         return world.getSeed();
+    }
+
+    @Override
+    protected BlockSurvey survey(World world) {
+        BlockSurvey survey = new BlockSurvey();
+        SurveyRegion region = new SurveyRegion(world.getMinHeight(), world.getMaxHeight() - 1);
+
+        for (Player player : world.getPlayers()) {
+            if (player.getGameMode() == GameMode.SPECTATOR) {
+                continue;
+            }
+            survey.addPlayer();
+            region.addPlayer(player.getLocation().getBlockX(), player.getLocation().getBlockY(), player.getLocation().getBlockZ());
+
+            for (ItemStack stack : player.getInventory().getContents()) {
+                if (stack != null && stack.getType().isBlock()) {
+                    survey.addInventoryBlock(stack.getType().name());
+                }
+            }
+        }
+
+        Map<Material, Integer> counts = new EnumMap<>(Material.class);
+        region.forEach((chunkX, chunkZ, minY, maxY) -> {
+            ChunkSnapshot snapshot = world.getChunkAt(chunkX, chunkZ).getChunkSnapshot(false, false, false);
+            for (int y = minY; y <= maxY; y++) {
+                for (int x = 0; x < 16; x++) {
+                    for (int z = 0; z < 16; z++) {
+                        Material type = snapshot.getBlockType(x, y, z);
+                        if (!type.isAir()) {
+                            counts.merge(type, 1, Integer::sum);
+                        }
+                    }
+                }
+            }
+        });
+        counts.forEach((type, count) -> survey.addBlocks(type.name(), count));
+
+        return survey;
     }
 
     @Override

@@ -2,6 +2,7 @@ package net.paulem.sotl.common.destruction;
 
 import net.paulem.sotl.common.destruction.model.DestroyedBlock;
 import net.paulem.sotl.common.destruction.model.StoredEntity;
+import net.paulem.sotl.common.utils.AlphabetUtils;
 
 import java.util.*;
 
@@ -17,7 +18,7 @@ public abstract class DestructionContext<W, K, MD extends DestroyedBlock, ME ext
     public static final long DEFAULT_BUDGET_PER_TICK = 10_000_000L; // 10 ms budget per tick by default
 
     private final W world;
-    private final String letter;
+    private final char letter;
     private final long maxNanosPerTick;
 
     private final Set<Long> queuedChunkKeys = new HashSet<>();
@@ -30,7 +31,7 @@ public abstract class DestructionContext<W, K, MD extends DestroyedBlock, ME ext
 
     protected DestructionContext(W world, char letter, long maxNanosPerTick) {
         this.world = world;
-        this.letter = Character.toString(letter);
+        this.letter = letter;
         this.maxNanosPerTick = maxNanosPerTick;
     }
 
@@ -52,7 +53,7 @@ public abstract class DestructionContext<W, K, MD extends DestroyedBlock, ME ext
     /** Tells the players the destruction starts. */
     public abstract void announceDestruction();
 
-    /** Computes the area to destroy around each player of the world. */
+    /** Computes the area to destroy around each player of the world, spectators excluded. */
     public abstract List<PlayerArea<K>> collectPlayerAreas();
 
     /** Stores in {@link #getStoredEntities()} then removes every non-player entity of the chunk. */
@@ -67,9 +68,9 @@ public abstract class DestructionContext<W, K, MD extends DestroyedBlock, ME ext
 
     // ---- Shared logic ----
 
-    /** Whether a block with this name must be destroyed for the current letter. */
+    /** Whether a block with this name must be destroyed: none of its words starts with the current letter. */
     public boolean shouldDestroy(String blockName) {
-        return !blockName.toUpperCase(Locale.ROOT).startsWith(letter);
+        return !AlphabetUtils.initials(blockName).contains(letter);
     }
 
     public boolean addChunk(K chunk) {
@@ -80,7 +81,7 @@ public abstract class DestructionContext<W, K, MD extends DestroyedBlock, ME ext
         return false;
     }
 
-    public String getLetter() {
+    public char getLetter() {
         return letter;
     }
 

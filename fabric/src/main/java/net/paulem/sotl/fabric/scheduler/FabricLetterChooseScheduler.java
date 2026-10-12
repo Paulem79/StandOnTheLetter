@@ -1,5 +1,6 @@
 package net.paulem.sotl.fabric.scheduler;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -14,11 +15,21 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.paulem.sotl.common.destruction.DestructionRunner;
+import net.paulem.sotl.common.scheduler.BlockSurvey;
 import net.paulem.sotl.common.scheduler.LetterChooseScheduler;
 import net.paulem.sotl.common.scheduler.LetterDisplay;
+import net.paulem.sotl.common.scheduler.SurveyRegion;
 import net.paulem.sotl.fabric.destruction.FabricDestructionContext;
+
+import java.util.IdentityHashMap;
+import java.util.Map;
 
 public class FabricLetterChooseScheduler extends LetterChooseScheduler<ServerLevel, ResourceKey<Level>> {
     private MinecraftServer server;
@@ -41,6 +52,50 @@ public class FabricLetterChooseScheduler extends LetterChooseScheduler<ServerLev
     @Override
     protected long worldSeed(ServerLevel world) {
         return world.getSeed();
+    }
+
+    @Override
+    protected BlockSurvey survey(ServerLevel world) {
+        BlockSurvey survey = new BlockSurvey();
+        SurveyRegion region = new SurveyRegion(world.getMinY(), world.getMaxY() - 1);
+
+        for (ServerPlayer player : world.players()) {
+            if (player.isSpectator()) {
+                continue;
+            }
+            survey.addPlayer();
+            region.addPlayer(player.getBlockX(), player.getBlockY(), player.getBlockZ());
+
+            for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+                ItemStack stack = player.getInventory().getItem(slot);
+                if (stack.getItem() instanceof BlockItem blockItem) {
+                    survey.addInventoryBlock(blockName(blockItem.getBlock()));
+                }
+            }
+        }
+
+        Map<Block, Integer> counts = new IdentityHashMap<>();
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        region.forEach((chunkX, chunkZ, minY, maxY) -> {
+            LevelChunk chunk = world.getChunk(chunkX, chunkZ);
+            for (int y = minY; y <= maxY; y++) {
+                for (int x = 0; x < 16; x++) {
+                    for (int z = 0; z < 16; z++) {
+                        BlockState state = chunk.getBlockState(pos.set((chunkX << 4) + x, y, (chunkZ << 4) + z));
+                        if (!state.isAir()) {
+                            counts.merge(state.getBlock(), 1, Integer::sum);
+                        }
+                    }
+                }
+            }
+        });
+        counts.forEach((block, count) -> survey.addBlocks(blockName(block), count));
+
+        return survey;
+    }
+
+    private static String blockName(Block block) {
+        return BuiltInRegistries.BLOCK.getKey(block).getPath();
     }
 
     @Override

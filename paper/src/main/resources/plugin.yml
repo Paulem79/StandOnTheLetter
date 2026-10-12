@@ -4,4 +4,4 @@ main: net.paulem.sotl.paper.PaperSOTL
 description: Stand on the blocks starting with this letter!
 author: Paulem
 website: https://paulem.net
-api-version: '26.3'
+api-version: '1.21'
