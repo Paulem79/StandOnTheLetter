@@ -14,6 +14,7 @@ dependencies {
 tasks.processResources {
     val props = mapOf(
         "version" to project.version,
+        "description" to project.property("mod_description"),
         "minecraft" to ">=26.1",
         "java" to ">=25"
     )

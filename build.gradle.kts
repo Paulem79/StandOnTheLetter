@@ -1,14 +1,16 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import com.modrinth.minotaur.ModrinthExtension
 import org.gradle.api.tasks.bundling.AbstractArchiveTask
 
 plugins {
     java
     id("com.gradleup.shadow") version "9.+"
+    id("com.modrinth.minotaur") version "2.+"
 }
 
 allprojects {
     group = "net.paulem.sotl"
-    version = "1.0.0"
+    version = property("mod_version") as String
 
     repositories {
         mavenCentral()
@@ -62,4 +64,41 @@ val legacyShadowJar by tasks.registering(ShadowJar::class) {
 
 tasks.build {
     dependsOn(tasks.shadowJar, legacyShadowJar)
+}
+
+fun ModrinthExtension.configureCommon(gameVersionsProperty: String) {
+    token.set(providers.gradleProperty("MODRINTH_TOKEN"))
+    projectId.set(property("modrinth_id") as String)
+    versionType.set(property("modrinth_version_type") as String)
+    loaders.addAll((property("modrinth_loaders") as String).split(","))
+    gameVersions.addAll((property(gameVersionsProperty) as String).split(","))
+    dependencies {
+        required.project("fabric-api")
+    }
+}
+
+modrinth {
+    configureCommon("modrinth_game_versions")
+    versionNumber.set(version.toString())
+    versionName.set("StandOnTheLetter $version")
+    uploadFile.set(tasks.shadowJar)
+}
+
+tasks.named("modrinth") {
+    dependsOn(tasks.shadowJar)
+}
+
+project(":fabric-legacy") {
+    apply(plugin = "com.modrinth.minotaur")
+
+    configure<ModrinthExtension> {
+        configureCommon("modrinth_legacy_game_versions")
+        versionNumber.set("$version+mc1.21")
+        versionName.set("StandOnTheLetter $version (MC 1.21.x)")
+        uploadFile.set(legacyShadowJar)
+    }
+
+    tasks.named("modrinth") {
+        dependsOn(legacyShadowJar)
+    }
 }

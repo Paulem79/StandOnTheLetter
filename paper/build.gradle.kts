@@ -16,6 +16,17 @@ tasks {
         options.release.set(21)
     }
 
+    processResources {
+        val props = mapOf(
+            "version" to project.version,
+            "description" to project.property("mod_description")
+        )
+        inputs.properties(props)
+        filesMatching("plugin.yml") {
+            expand(props)
+        }
+    }
+
     jar {
         from(project(":common").sourceSets.main.get().output)
     }

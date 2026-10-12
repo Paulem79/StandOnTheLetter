@@ -26,6 +26,7 @@ tasks.withType<JavaCompile>().configureEach {
 tasks.processResources {
     val props = mapOf(
         "version" to project.version,
+        "description" to project.property("mod_description"),
         "minecraft" to ">=1.21.6 <26",
         "java" to ">=21"
     )

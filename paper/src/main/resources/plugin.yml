@@ -1,7 +1,7 @@
 name: StandOnTheLetter
-version: 1.0.0
+version: ${version}
 main: net.paulem.sotl.paper.PaperSOTL
-description: Stand on the blocks starting with this letter!
+description: ${description}
 author: Paulem
 website: https://paulem.net
 api-version: '1.21'

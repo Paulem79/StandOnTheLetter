@@ -3,7 +3,7 @@
   "id": "sotl",
   "version": "${version}",
   "name": "StandOnTheLetter",
-  "description": "Stand on the blocks starting with this letter!",
+  "description": "${description}",
   "icon": "assets/sotl/icon.png",
   "environment": "*",
   "entrypoints": {
