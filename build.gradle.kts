@@ -27,18 +27,11 @@ subprojects {
     }
 }
 
-dependencies {
-    implementation(project(":common"))
-    implementation(project(":paper"))
-    implementation(project(":fabric"))
-}
-
-// Paper (1.21.x and 26.x) + Fabric 26.x
+// Fabric 26.x
 tasks.shadowJar {
-    archiveClassifier.set("")
+    archiveClassifier.set("fabric")
 
     from(project(":common").sourceSets.main.get().output)
-    from(project(":paper").sourceSets.main.get().output)
     from(project(":fabric").sourceSets.main.get().output)
 
     configurations = emptyList()
@@ -46,15 +39,14 @@ tasks.shadowJar {
     mergeServiceFiles()
 }
 
-// Paper (1.21.x and 26.x) + Fabric 1.21.x, which is obfuscated and runs on Java 21
+// Fabric 1.21.x, which is obfuscated and runs on Java 21
 val legacyShadowJar by tasks.registering(ShadowJar::class) {
     val legacyRemapJar = project(":fabric-legacy").tasks.named<AbstractArchiveTask>("remapJar")
     dependsOn(legacyRemapJar)
 
-    archiveClassifier.set("mc1.21")
+    archiveClassifier.set("fabric-mc1.21")
 
     from(project(":common").sourceSets.main.get().output)
-    from(project(":paper").sourceSets.main.get().output)
     from(legacyRemapJar.map { zipTree(it.archiveFile) })
 
     configurations = emptyList()
@@ -62,25 +54,33 @@ val legacyShadowJar by tasks.registering(ShadowJar::class) {
     mergeServiceFiles()
 }
 
+// Paper plugin (Paper, Purpur, Folia)
+// Looked up lazily: the paper project is configured after this one
+val paperJar = provider { project(":paper").tasks.named<AbstractArchiveTask>("shadowJar").get() }
+
 tasks.build {
-    dependsOn(tasks.shadowJar, legacyShadowJar)
+    dependsOn(tasks.shadowJar, legacyShadowJar, paperJar)
 }
 
-fun ModrinthExtension.configureCommon(gameVersionsProperty: String) {
+fun ModrinthExtension.configureCommon(loadersProperty: String, gameVersions: List<String>, requireFabricApi: Boolean) {
     token.set(providers.gradleProperty("MODRINTH_TOKEN"))
     projectId.set(property("modrinth_id") as String)
     versionType.set(property("modrinth_version_type") as String)
-    loaders.addAll((property("modrinth_loaders") as String).split(","))
-    gameVersions.addAll((property(gameVersionsProperty) as String).split(","))
-    dependencies {
-        required.project("fabric-api")
+    loaders.addAll((property(loadersProperty) as String).split(","))
+    this.gameVersions.addAll(gameVersions)
+    if (requireFabricApi) {
+        dependencies {
+            required.project("fabric-api")
+        }
     }
 }
 
+fun versionsOf(property: String) = (property(property) as String).split(",")
+
 modrinth {
-    configureCommon("modrinth_game_versions")
-    versionNumber.set(version.toString())
-    versionName.set("StandOnTheLetter $version")
+    configureCommon("modrinth_fabric_loaders", versionsOf("modrinth_game_versions"), true)
+    versionNumber.set("$version+fabric")
+    versionName.set("StandOnTheLetter $version (Fabric)")
     uploadFile.set(tasks.shadowJar)
 }
 
@@ -92,13 +92,32 @@ project(":fabric-legacy") {
     apply(plugin = "com.modrinth.minotaur")
 
     configure<ModrinthExtension> {
-        configureCommon("modrinth_legacy_game_versions")
-        versionNumber.set("$version+mc1.21")
-        versionName.set("StandOnTheLetter $version (MC 1.21.x)")
+        configureCommon("modrinth_fabric_loaders", versionsOf("modrinth_legacy_game_versions"), true)
+        versionNumber.set("$version+fabric.mc1.21")
+        versionName.set("StandOnTheLetter $version (Fabric, MC 1.21.x)")
         uploadFile.set(legacyShadowJar)
     }
 
     tasks.named("modrinth") {
         dependsOn(legacyShadowJar)
+    }
+}
+
+project(":paper") {
+    apply(plugin = "com.modrinth.minotaur")
+
+    configure<ModrinthExtension> {
+        configureCommon(
+            "modrinth_paper_loaders",
+            versionsOf("modrinth_paper_extra_game_versions") + versionsOf("modrinth_legacy_game_versions") + versionsOf("modrinth_game_versions"),
+            false
+        )
+        versionNumber.set("$version+paper")
+        versionName.set("StandOnTheLetter $version (Paper)")
+        uploadFile.set(paperJar)
+    }
+
+    tasks.named("modrinth") {
+        dependsOn(paperJar)
     }
 }

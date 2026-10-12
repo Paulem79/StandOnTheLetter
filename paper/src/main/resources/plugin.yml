@@ -5,3 +5,4 @@ description: ${description}
 author: Paulem
 website: https://paulem.net
 api-version: '1.21'
+folia-supported: true

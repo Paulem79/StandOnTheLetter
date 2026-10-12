@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Picks a letter for each world every {@link SOTLSettings#LETTER_INTERVAL_TICKS}, spins it, announces it
@@ -21,6 +22,7 @@ public abstract class LetterChooseScheduler<W, K> implements Runnable {
     private final Map<K, Random> randoms = new HashMap<>();
     private final Map<K, Character> lastChar = new HashMap<>();
 
+    private final List<PendingSurvey> pendingSurveys = new ArrayList<>();
     private final List<Roll> rolls = new ArrayList<>();
     private final List<PendingDestruction> pendingDestructions = new ArrayList<>();
     private final List<DestructionRunner> destructions = new ArrayList<>();
@@ -33,8 +35,11 @@ public abstract class LetterChooseScheduler<W, K> implements Runnable {
 
     protected abstract long worldSeed(W world);
 
-    /** Blocks around the players of the world who take part in the round, spectators excluded. */
-    protected abstract BlockSurvey survey(W world);
+    /**
+     * Blocks around the players of the world who take part in the round, spectators excluded.
+     * May complete on any thread: the result is read back on the ticking one.
+     */
+    protected abstract CompletableFuture<BlockSurvey> survey(W world);
 
     protected abstract void showLetter(W world, char letter, LetterDisplay display);
 
@@ -50,6 +55,16 @@ public abstract class LetterChooseScheduler<W, K> implements Runnable {
         if (ticks % SOTLSettings.LETTER_INTERVAL_TICKS == 0) {
             startRound();
         }
+
+        pendingSurveys.removeIf(pending -> {
+            if (!pending.future.isDone()) {
+                return false;
+            }
+            if (!pending.future.isCompletedExceptionally()) {
+                startRound(pending.world, pending.future.join());
+            }
+            return true;
+        });
 
         rolls.removeIf(roll -> {
             if (!roll.tick()) {
@@ -72,35 +87,48 @@ public abstract class LetterChooseScheduler<W, K> implements Runnable {
 
     private void startRound() {
         for (W world : worlds()) {
-            BlockSurvey survey = survey(world);
-            if (!survey.hasPlayers()) {
-                continue;
-            }
-
-            K key = worldKey(world);
-            Random random = randoms.computeIfAbsent(key, k -> new Random(worldSeed(world) ^ System.currentTimeMillis()));
-
-            Map<Character, Double> weights = survey.letterWeights();
-            if (weights.isEmpty()) {
-                weights = AlphabetUtils.getWeights();
-            }
-
-            // Avoid drawing the same letter twice in a row, unless it is the only one possible
-            Map<Character, Double> candidates = new HashMap<>(weights);
-            if (candidates.size() > 1) {
-                candidates.remove(lastChar.get(key));
-            }
-
-            char letter = AlphabetUtils.pickLetter(candidates, random);
-            lastChar.put(key, letter);
-
-            rolls.add(new Roll(world, letter, random, weights));
+            pendingSurveys.add(new PendingSurvey(world, survey(world)));
         }
+    }
+
+    private void startRound(W world, BlockSurvey survey) {
+        if (!survey.hasPlayers()) {
+            return;
+        }
+
+        K key = worldKey(world);
+        Random random = randoms.computeIfAbsent(key, k -> new Random(worldSeed(world) ^ System.currentTimeMillis()));
+
+        Map<Character, Double> weights = survey.letterWeights();
+        if (weights.isEmpty()) {
+            weights = AlphabetUtils.getWeights();
+        }
+
+        // Avoid drawing the same letter twice in a row, unless it is the only one possible
+        Map<Character, Double> candidates = new HashMap<>(weights);
+        if (candidates.size() > 1) {
+            candidates.remove(lastChar.get(key));
+        }
+
+        char letter = AlphabetUtils.pickLetter(candidates, random);
+        lastChar.put(key, letter);
+
+        rolls.add(new Roll(world, letter, random, weights));
     }
 
     private void end(W world, char letter) {
         showLetter(world, letter, LetterDisplay.FINAL);
         pendingDestructions.add(new PendingDestruction(world, letter, SOTLSettings.DESTRUCTION_DELAY_TICKS));
+    }
+
+    private final class PendingSurvey {
+        private final W world;
+        private final CompletableFuture<BlockSurvey> future;
+
+        private PendingSurvey(W world, CompletableFuture<BlockSurvey> future) {
+            this.world = world;
+            this.future = future;
+        }
     }
 
     private final class Roll {

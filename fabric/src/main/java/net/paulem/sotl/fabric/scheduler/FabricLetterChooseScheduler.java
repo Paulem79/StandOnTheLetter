@@ -30,6 +30,7 @@ import net.paulem.sotl.fabric.destruction.FabricDestructionContext;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public class FabricLetterChooseScheduler extends LetterChooseScheduler<ServerLevel, ResourceKey<Level>> {
     private MinecraftServer server;
@@ -55,7 +56,7 @@ public class FabricLetterChooseScheduler extends LetterChooseScheduler<ServerLev
     }
 
     @Override
-    protected BlockSurvey survey(ServerLevel world) {
+    protected CompletableFuture<BlockSurvey> survey(ServerLevel world) {
         BlockSurvey survey = new BlockSurvey();
         SurveyRegion region = new SurveyRegion(world.getMinY(), world.getMaxY() - 1);
 
@@ -91,7 +92,7 @@ public class FabricLetterChooseScheduler extends LetterChooseScheduler<ServerLev
         });
         counts.forEach((block, count) -> survey.addBlocks(blockName(block), count));
 
-        return survey;
+        return CompletableFuture.completedFuture(survey);
     }
 
     private static String blockName(Block block) {

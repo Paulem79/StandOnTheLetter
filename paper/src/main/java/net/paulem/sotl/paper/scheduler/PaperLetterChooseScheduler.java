@@ -20,9 +20,11 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.time.Duration;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class PaperLetterChooseScheduler extends LetterChooseScheduler<World, UUID> {
 
@@ -42,7 +44,7 @@ public class PaperLetterChooseScheduler extends LetterChooseScheduler<World, UUI
     }
 
     @Override
-    protected BlockSurvey survey(World world) {
+    protected CompletableFuture<BlockSurvey> survey(World world) {
         BlockSurvey survey = new BlockSurvey();
         SurveyRegion region = new SurveyRegion(world.getMinHeight(), world.getMaxHeight() - 1);
 
@@ -76,13 +78,15 @@ public class PaperLetterChooseScheduler extends LetterChooseScheduler<World, UUI
         });
         counts.forEach((type, count) -> survey.addBlocks(type.name(), count));
 
-        return survey;
+        return CompletableFuture.completedFuture(survey);
     }
 
     @Override
     protected DestructionRunner createDestruction(World world, char letter) {
         return DestructionRunner.of(new PaperDestructionContext(world, letter));
     }
+
+    private static final Duration TICK = Duration.ofMillis(50);
 
     @Override
     protected void showLetter(World world, char letter, LetterDisplay display) {
@@ -94,11 +98,17 @@ public class PaperLetterChooseScheduler extends LetterChooseScheduler<World, UUI
             sound = org.bukkit.Sound.ENTITY_PLAYER_LEVELUP;
         }
 
-        world.showTitle(Title.title(Component.text(letter), subtitle, 0, 70, 10));
-
+        Title title = Title.title(Component.text(letter), subtitle, Title.Times.times(Duration.ZERO, TICK.multipliedBy(70), TICK.multipliedBy(10)));
         NamespacedKey soundKey = Registry.SOUNDS.getKey(sound);
-        if (soundKey != null) {
-            world.playSound(Sound.sound().type(soundKey).build());
+
+        send(world, title, soundKey == null ? null : Sound.sound().type(soundKey).build());
+    }
+
+    /** Shows the title and plays the sound (if any) to every player of the world. */
+    protected void send(World world, Title title, Sound sound) {
+        world.showTitle(title);
+        if (sound != null) {
+            world.playSound(sound);
         }
     }
 }
