@@ -2,21 +2,23 @@ package net.paulem.sotl.common.destruction.state;
 
 import net.paulem.sotl.common.destruction.DestructionContext;
 
-public abstract class WaitingState<C extends DestructionContext<?, ?, ?, ?>> implements DestructionState<C> {
+import java.util.function.Supplier;
+
+public class WaitingState<C extends DestructionContext<?, ?, ?, ?>> implements DestructionState<C> {
+    private final Supplier<DestructionState<C>> next;
     private int remainingTicks;
 
-    protected WaitingState(int ticks) {
+    public WaitingState(int ticks, Supplier<DestructionState<C>> next) {
         this.remainingTicks = ticks;
+        this.next = next;
     }
 
     @Override
     public DestructionState<C> tick(C context, long startTime) {
         remainingTicks--;
         if (remainingTicks <= 0) {
-            return getNextState();
+            return next.get();
         }
         return this;
     }
-
-    public abstract DestructionState<C> getNextState();
 }

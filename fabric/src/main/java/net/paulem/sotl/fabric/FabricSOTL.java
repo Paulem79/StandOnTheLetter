@@ -21,7 +21,6 @@ public class FabricSOTL implements ModInitializer, SOTL<FabricSOTL> {
     private static FabricSOTL instance;
     private final LoggerWrapper loggerWrapper = new FabricLoggerWrapper(LoggerFactory.getLogger(MOD_ID));
     private final FabricLetterChooseScheduler letterChooseScheduler = new FabricLetterChooseScheduler();
-    private int ticks = 0;
 
     @Override
     public void onInitialize() {
@@ -30,13 +29,7 @@ public class FabricSOTL implements ModInitializer, SOTL<FabricSOTL> {
 
         initLetterWeights();
 
-        ServerTickEvents.END_SERVER_TICK.register(server -> {
-            ticks++;
-            if (ticks % (20 * 60) == 0) {
-                letterChooseScheduler.run(server);
-            }
-            letterChooseScheduler.tick(server);
-        });
+        ServerTickEvents.END_SERVER_TICK.register(letterChooseScheduler::tick);
 
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
             logger().info("SOTL disabled!");

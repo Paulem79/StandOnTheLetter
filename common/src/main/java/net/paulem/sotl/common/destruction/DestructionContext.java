@@ -5,15 +5,23 @@ import net.paulem.sotl.common.destruction.model.StoredEntity;
 
 import java.util.*;
 
-public abstract class DestructionContext<W, C, MD extends DestroyedBlock, ME extends StoredEntity> {
+/**
+ * State shared by all steps of one destruction, and the platform hooks they rely on.
+ *
+ * @param <W>  world type
+ * @param <K>  chunk type
+ * @param <MD> destroyed block model
+ * @param <ME> stored entity model
+ */
+public abstract class DestructionContext<W, K, MD extends DestroyedBlock, ME extends StoredEntity> {
     public static final long DEFAULT_BUDGET_PER_TICK = 10_000_000L; // 10 ms budget per tick by default
 
     private final W world;
     private final String letter;
     private final long maxNanosPerTick;
 
-    protected final Set<Long> queuedChunkKeys = new HashSet<>();
-    protected final List<C> targetChunks = new ArrayList<>();
+    private final Set<Long> queuedChunkKeys = new HashSet<>();
+    private final List<K> targetChunks = new ArrayList<>();
     private final List<MD> destroyedBlocks = new ArrayList<>();
     private final List<ME> storedEntities = new ArrayList<>();
     private final Map<Long, Integer> chunkStartHeights = new HashMap<>();
@@ -26,8 +34,46 @@ public abstract class DestructionContext<W, C, MD extends DestroyedBlock, ME ext
         this.maxNanosPerTick = maxNanosPerTick;
     }
 
-    protected boolean addChunk(long chunkKey, C chunk) {
-        if (queuedChunkKeys.add(chunkKey)) {
+    protected DestructionContext(W world, char letter) {
+        this(world, letter, DEFAULT_BUDGET_PER_TICK);
+    }
+
+    // ---- Platform hooks ----
+
+    /** Unique key of a chunk, used to track per-chunk data. */
+    public abstract long chunkKey(K chunk);
+
+    /** Lowest Y of the world. */
+    public abstract int minY();
+
+    /** Highest Y blocks can be destroyed from. */
+    public abstract int topY();
+
+    /** Tells the players the destruction starts. */
+    public abstract void announceDestruction();
+
+    /** Computes the area to destroy around each player of the world. */
+    public abstract List<PlayerArea<K>> collectPlayerAreas();
+
+    /** Stores in {@link #getStoredEntities()} then removes every non-player entity of the chunk. */
+    public abstract void storeAndRemoveEntities(K chunk);
+
+    /** Destroys the block if it must be, and records it in {@link #getDestroyedBlocks()}. */
+    public abstract void destroyBlockAt(K chunk, int x, int y, int z);
+
+    public abstract void restoreBlock(MD block);
+
+    public abstract void restoreEntity(ME entity);
+
+    // ---- Shared logic ----
+
+    /** Whether a block with this name must be destroyed for the current letter. */
+    public boolean shouldDestroy(String blockName) {
+        return !blockName.toUpperCase(Locale.ROOT).startsWith(letter);
+    }
+
+    public boolean addChunk(K chunk) {
+        if (queuedChunkKeys.add(chunkKey(chunk))) {
             targetChunks.add(chunk);
             return true;
         }
@@ -40,6 +86,10 @@ public abstract class DestructionContext<W, C, MD extends DestroyedBlock, ME ext
 
     public long getMaxNanosPerTick() {
         return maxNanosPerTick;
+    }
+
+    public boolean isOutOfBudget(long startTime) {
+        return System.nanoTime() - startTime >= maxNanosPerTick;
     }
 
     public Map<Long, Integer> getChunkStartHeights() {
@@ -62,7 +112,7 @@ public abstract class DestructionContext<W, C, MD extends DestroyedBlock, ME ext
         return storedEntities;
     }
 
-    public List<C> getTargetChunks() {
+    public List<K> getTargetChunks() {
         return targetChunks;
     }
 

@@ -24,7 +24,7 @@ public class PaperSOTL extends JavaPlugin implements SOTL<PaperSOTL> {
 
         initLetterWeights();
 
-        Bukkit.getScheduler().runTaskTimer(this, new PaperLetterChooseScheduler(), 0L, 20L * 60);
+        Bukkit.getScheduler().runTaskTimer(this, new PaperLetterChooseScheduler(), 0L, 1L);
 
         super.onEnable();
     }
