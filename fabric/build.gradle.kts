@@ -8,7 +8,7 @@ dependencies {
 
     minecraft("com.mojang:minecraft:26.3")
     implementation("net.fabricmc:fabric-loader:0.19.5")
-    implementation("net.fabricmc.fabric-api:fabric-api:0.162.0+26.3")
+    implementation("net.fabricmc.fabric-api:fabric-api:0.163.0+26.4")
 }
 
 tasks.processResources {
