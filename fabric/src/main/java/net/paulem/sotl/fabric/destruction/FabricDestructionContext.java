@@ -61,7 +61,7 @@ public class FabricDestructionContext extends DestructionContext<ServerLevel, Le
     public void announceDestruction() {
         for (ServerPlayer player : getWorld().players()) {
             player.connection.send(new ClientboundSetTitlesAnimationPacket(0, 70, 10));
-            player.connection.send(new ClientboundSetTitleTextPacket(Component.literal("Gone!")));
+            player.connection.send(new ClientboundSetTitleTextPacket(Component.literal(SOTLSettings.config().destructionText())));
             player.connection.send(new ClientboundSetSubtitleTextPacket(Component.empty()));
         }
     }
@@ -71,14 +71,14 @@ public class FabricDestructionContext extends DestructionContext<ServerLevel, Le
         return getWorld().players().stream()
                 .filter(player -> !player.isSpectator())
                 .map(player -> new PlayerArea<>(
-                        Math.min(topY(), player.getBlockY() + SOTLSettings.PLAYER_HEIGHT_MARGIN),
+                        Math.min(topY(), player.getBlockY() + SOTLSettings.config().playerHeightMargin()),
                         chunksAround(player)
                 ))
                 .toList();
     }
 
     private List<LevelChunk> chunksAround(ServerPlayer player) {
-        return ChunkUtils.getChunksAround(player.getBlockX() >> 4, player.getBlockZ() >> 4, SOTLSettings.PLAYER_CHUNK_RADIUS,
+        return ChunkUtils.getChunksAround(player.getBlockX() >> 4, player.getBlockZ() >> 4, SOTLSettings.config().playerChunkRadius(),
                 (x, z) -> getWorld().getChunk(x, z));
     }
 

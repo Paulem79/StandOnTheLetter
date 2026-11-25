@@ -1,18 +1,21 @@
 package net.paulem.sotl.common.scheduler;
 
+import net.paulem.sotl.common.SOTLConfig;
 import net.paulem.sotl.common.SOTLSettings;
 import net.paulem.sotl.common.destruction.DestructionRunner;
 import net.paulem.sotl.common.utils.AlphabetUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Picks a letter for each world every {@link SOTLSettings#LETTER_INTERVAL_TICKS}, spins it, announces it
+ * Picks a letter for each world every {@link SOTLConfig#roundIntervalSeconds()}, spins it, announces it
  * then destroys every block none of whose words starts with it. Call {@link #tick()} once per server tick.
  *
  * @param <W> world type
@@ -25,9 +28,12 @@ public abstract class LetterChooseScheduler<W, K> implements Runnable {
     private final List<PendingSurvey> pendingSurveys = new ArrayList<>();
     private final List<Roll> rolls = new ArrayList<>();
     private final List<PendingDestruction> pendingDestructions = new ArrayList<>();
-    private final List<DestructionRunner> destructions = new ArrayList<>();
+    private final List<ActiveDestruction> destructions = new ArrayList<>();
+    /**
+     * Worlds with a round in progress */
+    private final Set<K> busyWorlds = new HashSet<>();
 
-    private int ticks = 0;
+    private int ticksSinceLastRound = 0;
 
     protected abstract Iterable<W> worlds();
 
@@ -51,16 +57,18 @@ public abstract class LetterChooseScheduler<W, K> implements Runnable {
     }
 
     public void tick() {
-        ticks++;
-        if (ticks % SOTLSettings.LETTER_INTERVAL_TICKS == 0) {
-            startRound();
+        if (++ticksSinceLastRound >= SOTLSettings.config().roundIntervalTicks()) {
+            ticksSinceLastRound = 0;
+            startRounds();
         }
 
         pendingSurveys.removeIf(pending -> {
             if (!pending.future.isDone()) {
                 return false;
             }
-            if (!pending.future.isCompletedExceptionally()) {
+            if (pending.future.isCompletedExceptionally()) {
+                busyWorlds.remove(worldKey(pending.world));
+            } else {
                 startRound(pending.world, pending.future.join());
             }
             return true;
@@ -78,25 +86,37 @@ public abstract class LetterChooseScheduler<W, K> implements Runnable {
             if (--pending.remainingTicks > 0) {
                 return false;
             }
-            destructions.add(createDestruction(pending.world, pending.letter));
+            DestructionRunner runner = createDestruction(pending.world, pending.letter);
+            destructions.add(new ActiveDestruction(worldKey(pending.world), runner));
             return true;
         });
 
-        destructions.removeIf(DestructionRunner::tick);
+        destructions.removeIf(destruction -> {
+            if (!destruction.runner.tick()) {
+                return false;
+            }
+            busyWorlds.remove(destruction.key);
+            return true;
+        });
     }
 
-    private void startRound() {
+    private void startRounds() {
         for (W world : worlds()) {
-            pendingSurveys.add(new PendingSurvey(world, survey(world)));
+            K key = worldKey(world);
+            if (!busyWorlds.contains(key)) {
+                pendingSurveys.add(new PendingSurvey(world, survey(world)));
+                busyWorlds.add(key);
+            }
         }
     }
 
     private void startRound(W world, BlockSurvey survey) {
+        K key = worldKey(world);
         if (!survey.hasPlayers()) {
+            busyWorlds.remove(key);
             return;
         }
 
-        K key = worldKey(world);
         Random random = randoms.computeIfAbsent(key, k -> new Random(worldSeed(world) ^ System.currentTimeMillis()));
 
         Map<Character, Double> weights = survey.letterWeights();
@@ -118,7 +138,17 @@ public abstract class LetterChooseScheduler<W, K> implements Runnable {
 
     private void end(W world, char letter) {
         showLetter(world, letter, LetterDisplay.FINAL);
-        pendingDestructions.add(new PendingDestruction(world, letter, SOTLSettings.DESTRUCTION_DELAY_TICKS));
+        pendingDestructions.add(new PendingDestruction(world, letter, SOTLSettings.config().destructionDelayTicks()));
+    }
+
+    private final class ActiveDestruction {
+        private final K key;
+        private final DestructionRunner runner;
+
+        private ActiveDestruction(K key, DestructionRunner runner) {
+            this.key = key;
+            this.runner = runner;
+        }
     }
 
     private final class PendingSurvey {

@@ -58,6 +58,6 @@ public class DestroyingState<W, K, MD extends DestroyedBlock, ME extends StoredE
             currentY--;
         }
 
-        return new WaitingState<>(SOTLSettings.RESTORE_DELAY_TICKS, RestoringState::new);
+        return new WaitingState<>(SOTLSettings.config().restoreDelayTicks(), RestoringState::new);
     }
 }

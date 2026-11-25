@@ -17,6 +17,7 @@ dependencies {
     mappings(loom.officialMojangMappings())
     modImplementation("net.fabricmc:fabric-loader:0.19.5")
     modImplementation("net.fabricmc.fabric-api:fabric-api:0.141.6+$minecraftVersion")
+    modImplementation("maven.modrinth:midnightlib:1.10.0+$minecraftVersion-fabric")
 }
 
 tasks.withType<JavaCompile>().configureEach {

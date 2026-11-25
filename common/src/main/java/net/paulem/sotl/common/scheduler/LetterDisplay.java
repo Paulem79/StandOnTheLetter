@@ -1,19 +1,19 @@
 package net.paulem.sotl.common.scheduler;
 
+import net.paulem.sotl.common.SOTLConfig;
 import net.paulem.sotl.common.SOTLSettings;
 
 /** What the players are told alongside a letter. */
 public enum LetterDisplay {
-    SPINNING("Spinning..."),
-    FINAL("Gone in " + SOTLSettings.DESTRUCTION_DELAY_TICKS / SOTLSettings.TICKS_PER_SECOND + "s");
-
-    private final String subtitle;
-
-    LetterDisplay(String subtitle) {
-        this.subtitle = subtitle;
-    }
+    SPINNING,
+    FINAL;
 
     public String subtitle() {
-        return subtitle;
+        SOTLConfig config = SOTLSettings.config();
+        return switch (this) {
+            case SPINNING -> config.spinningText();
+            case FINAL -> config.finalText()
+                    .replace(SOTLConfig.SECONDS_PLACEHOLDER, String.valueOf(config.destructionDelaySeconds()));
+        };
     }
 }

@@ -2,8 +2,8 @@ package net.paulem.sotl.paper.folia;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
+import net.paulem.sotl.common.SOTLConfig;
 import net.paulem.sotl.common.SOTLSettings;
-import net.paulem.sotl.common.destruction.DestructionContext;
 import net.paulem.sotl.common.utils.AlphabetUtils;
 import net.paulem.sotl.common.utils.ChunkUtils;
 import net.paulem.sotl.paper.destruction.model.PaperDestroyedBlock;
@@ -47,7 +47,7 @@ final class FoliaDestruction {
 
     private Phase phase = Phase.PREPARE;
     private boolean prepareStarted = false;
-    private int waitTicks = SOTLSettings.RESTORE_DELAY_TICKS;
+    private int waitTicks;
 
     FoliaDestruction(Plugin plugin, World world, char letter) {
         this.plugin = plugin;
@@ -73,7 +73,10 @@ final class FoliaDestruction {
                 phase = Phase.DESTROY;
                 dispatch(ChunkJob::destroy);
             }
-            case DESTROY -> phase = Phase.WAIT;
+            case DESTROY -> {
+                phase = Phase.WAIT;
+                waitTicks = SOTLSettings.config().restoreDelayTicks();
+            }
             case WAIT -> {
                 if (--waitTicks <= 0) {
                     phase = Phase.RESTORE;
@@ -94,7 +97,8 @@ final class FoliaDestruction {
             return false;
         }
 
-        Title title = Title.title(Component.text("Gone!"), Component.empty());
+        SOTLConfig config = SOTLSettings.config();
+        Title title = Title.title(Component.text(config.destructionText()), Component.empty());
 
         pending.set(players.size());
         for (Player player : players) {
@@ -106,10 +110,10 @@ final class FoliaDestruction {
                     }
 
                     Location location = player.getLocation();
-                    int startHeight = Math.min(world.getMaxHeight() - 1, location.getBlockY() + SOTLSettings.PLAYER_HEIGHT_MARGIN);
+                    int startHeight = Math.min(world.getMaxHeight() - 1, location.getBlockY() + config.playerHeightMargin());
                     int centerX = location.getBlockX() >> 4;
                     int centerZ = location.getBlockZ() >> 4;
-                    int radius = SOTLSettings.PLAYER_CHUNK_RADIUS;
+                    int radius = config.playerChunkRadius();
 
                     for (int chunkX = centerX - radius; chunkX <= centerX + radius; chunkX++) {
                         for (int chunkZ = centerZ - radius; chunkZ <= centerZ + radius; chunkZ++) {
@@ -185,7 +189,7 @@ final class FoliaDestruction {
         }
 
         private boolean isOutOfBudget(long start) {
-            return System.nanoTime() - start >= DestructionContext.DEFAULT_BUDGET_PER_TICK;
+            return System.nanoTime() - start >= SOTLSettings.config().maxNanosPerTick();
         }
 
         private void destroyStep() {
@@ -249,7 +253,15 @@ final class FoliaDestruction {
             try {
                 if (!world.isChunkLoaded(chunkX, chunkZ)) {
                     // Load it back first, then carry on from the region which will own it
-                    world.getChunkAtAsync(chunkX, chunkZ).thenRun(() -> run(this::restoreStep));
+                    world.getChunkAtAsync(chunkX, chunkZ).whenComplete((chunk, error) -> {
+                        if (error == null) {
+                            run(this::restoreStep);
+                        } else {
+                            // Woooh poor world who can't load the chunk
+                            plugin.getLogger().warning("Could not load chunk " + chunkX + ", " + chunkZ + ": " + error);
+                            pending.decrementAndGet();
+                        }
+                    });
                     return;
                 }
 

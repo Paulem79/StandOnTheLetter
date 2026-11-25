@@ -1,5 +1,6 @@
 package net.paulem.sotl.common.scheduler;
 
+import net.paulem.sotl.common.SOTLConfig;
 import net.paulem.sotl.common.SOTLSettings;
 import net.paulem.sotl.common.utils.ChunkUtils;
 
@@ -24,15 +25,16 @@ public final class SurveyRegion {
     }
 
     public void addPlayer(int blockX, int blockY, int blockZ) {
-        int minY = Math.max(worldMinY, blockY - SOTLSettings.SURVEY_DEPTH);
-        int maxY = Math.min(worldTopY, blockY + SOTLSettings.PLAYER_HEIGHT_MARGIN);
+        SOTLConfig config = SOTLSettings.config();
+        int minY = Math.max(worldMinY, blockY - config.surveyDepth());
+        int maxY = Math.min(worldTopY, blockY + config.playerHeightMargin());
         if (minY > maxY) {
             return;
         }
 
         int centerX = blockX >> 4;
         int centerZ = blockZ >> 4;
-        int radius = SOTLSettings.PLAYER_CHUNK_RADIUS;
+        int radius = config.playerChunkRadius();
 
         for (int chunkX = centerX - radius; chunkX <= centerX + radius; chunkX++) {
             for (int chunkZ = centerZ - radius; chunkZ <= centerZ + radius; chunkZ++) {

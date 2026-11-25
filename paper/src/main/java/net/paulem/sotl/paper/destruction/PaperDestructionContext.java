@@ -42,7 +42,7 @@ public class PaperDestructionContext extends DestructionContext<World, Chunk, Pa
 
     @Override
     public void announceDestruction() {
-        getWorld().showTitle(Title.title(Component.text("Gone!"), Component.empty()));
+        getWorld().showTitle(Title.title(Component.text(SOTLSettings.config().destructionText()), Component.empty()));
     }
 
     @Override
@@ -50,7 +50,7 @@ public class PaperDestructionContext extends DestructionContext<World, Chunk, Pa
         return getWorld().getPlayers().stream()
                 .filter(player -> player.getGameMode() != GameMode.SPECTATOR)
                 .map(player -> new PlayerArea<>(
-                        Math.min(topY(), player.getLocation().getBlockY() + SOTLSettings.PLAYER_HEIGHT_MARGIN),
+                        Math.min(topY(), player.getLocation().getBlockY() + SOTLSettings.config().playerHeightMargin()),
                         chunksAround(player)
                 ))
                 .toList();
@@ -58,7 +58,7 @@ public class PaperDestructionContext extends DestructionContext<World, Chunk, Pa
 
     private List<Chunk> chunksAround(Player player) {
         Chunk center = player.getLocation().getChunk();
-        return ChunkUtils.getChunksAround(center.getX(), center.getZ(), SOTLSettings.PLAYER_CHUNK_RADIUS,
+        return ChunkUtils.getChunksAround(center.getX(), center.getZ(), SOTLSettings.config().playerChunkRadius(),
                 (x, z) -> center.getWorld().getChunkAt(x, z));
     }
 

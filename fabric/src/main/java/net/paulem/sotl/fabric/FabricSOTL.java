@@ -1,13 +1,16 @@
 package net.paulem.sotl.fabric;
 
+import eu.midnightdust.lib.config.MidnightConfig;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Blocks;
 import net.paulem.sotl.common.SOTL;
+import net.paulem.sotl.common.SOTLSettings;
 import net.paulem.sotl.common.wrapper.LoggerWrapper;
 import net.paulem.sotl.common.utils.AlphabetUtils;
+import net.paulem.sotl.fabric.config.FabricConfig;
 import net.paulem.sotl.fabric.logger.FabricLoggerWrapper;
 import net.paulem.sotl.fabric.scheduler.FabricLetterChooseScheduler;
 import org.slf4j.LoggerFactory;
@@ -26,9 +29,15 @@ public class FabricSOTL implements ModInitializer, SOTL<FabricSOTL> {
         instance = this;
         logger().info("Initializing SOTL");
 
+        MidnightConfig.register(MOD_ID, FabricConfig.class);
         initLetterWeights();
 
-        ServerTickEvents.END_SERVER_TICK.register(letterChooseScheduler::tick);
+        ServerTickEvents.END_SERVER_TICK.register(server -> {
+            // "Reload" config when changes are made in game
+            // Maybe updated too often ? Maybe but I don't think lol (yeah I'm talking to myself and SO WHAT, nobody will ever read my comments so that's okay ig)
+            SOTLSettings.apply(FabricConfig.toConfig());
+            letterChooseScheduler.tick(server);
+        });
 
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
             logger().info("SOTL disabled!");
