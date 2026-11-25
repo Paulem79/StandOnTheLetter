@@ -8,7 +8,7 @@ dependencies {
 
     minecraft("com.mojang:minecraft:26.3")
     implementation("net.fabricmc:fabric-loader:0.20.1")
-    implementation("net.fabricmc.fabric-api:fabric-api:0.167.1+26.4")
+    implementation("net.fabricmc.fabric-api:fabric-api:0.162.0+26.3")
     implementation("maven.modrinth:midnightlib:1.10.0+26.3-fabric")
 }
 
