@@ -97,6 +97,7 @@ modrinth {
     versionNumber.set("$version+fabric")
     versionName.set("StandOnTheLetter $version (Fabric)")
     uploadFile.set(tasks.shadowJar)
+    syncBodyFrom.set(providers.fileContents(layout.projectDirectory.file("README.md")).asText)
 }
 
 tasks.named("modrinth") {
@@ -116,6 +117,11 @@ project(":fabric-legacy") {
     tasks.named("modrinth") {
         dependsOn(legacyShadowJar)
     }
+
+    // root project already syncs
+    tasks.named("modrinthSyncBody") {
+        enabled = false
+    }
 }
 
 project(":paper") {
@@ -134,5 +140,10 @@ project(":paper") {
 
     tasks.named("modrinth") {
         dependsOn(paperJar)
+    }
+
+    // root project already syncs
+    tasks.named("modrinthSyncBody") {
+        enabled = false
     }
 }
