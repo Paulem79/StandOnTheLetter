@@ -1,6 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.modrinth.minotaur.ModrinthExtension
 import org.gradle.api.tasks.bundling.AbstractArchiveTask
+import java.nio.ByteBuffer
 
 plugins {
     java
@@ -16,6 +17,9 @@ allprojects {
         mavenCentral()
         maven("https://repo.papermc.io/repository/maven-public/")
         maven("https://maven.fabricmc.net/")
+        maven("https://api.modrinth.com/maven") {
+            content { includeGroup("maven.modrinth") }
+        }
     }
 }
 
@@ -62,15 +66,26 @@ tasks.build {
     dependsOn(tasks.shadowJar, legacyShadowJar, paperJar)
 }
 
-fun ModrinthExtension.configureCommon(loadersProperty: String, gameVersions: List<String>, requireFabricApi: Boolean) {
+// Gradle reads gradle.properties as ISO-8859-1, so go get them in utf-8 bro
+fun asUtf8(value: String): String {
+    if (value.any { it.code > 255 }) {
+        return value
+    }
+    val bytes = ByteBuffer.wrap(value.toByteArray(Charsets.ISO_8859_1))
+    return runCatching { Charsets.UTF_8.newDecoder().decode(bytes).toString() }.getOrDefault(value)
+}
+
+fun ModrinthExtension.configureCommon(loadersProperty: String, gameVersions: List<String>, requireFabricDependencies: Boolean) {
     token.set(providers.gradleProperty("MODRINTH_TOKEN"))
     projectId.set(property("modrinth_id") as String)
     versionType.set(property("modrinth_version_type") as String)
+    providers.gradleProperty("modrinth_changelog").orNull?.takeIf { it.isNotBlank() }?.let { changelog.set(asUtf8(it)) }
     loaders.addAll((property(loadersProperty) as String).split(","))
     this.gameVersions.addAll(gameVersions)
-    if (requireFabricApi) {
+    if (requireFabricDependencies) {
         dependencies {
             required.project("fabric-api")
+            required.project("midnightlib")
         }
     }
 }
@@ -82,6 +97,7 @@ modrinth {
     versionNumber.set("$version+fabric")
     versionName.set("StandOnTheLetter $version (Fabric)")
     uploadFile.set(tasks.shadowJar)
+    syncBodyFrom.set(providers.fileContents(layout.projectDirectory.file("README.md")).asText)
 }
 
 tasks.named("modrinth") {
@@ -101,6 +117,11 @@ project(":fabric-legacy") {
     tasks.named("modrinth") {
         dependsOn(legacyShadowJar)
     }
+
+    // root project already syncs
+    tasks.named("modrinthSyncBody") {
+        enabled = false
+    }
 }
 
 project(":paper") {
@@ -119,5 +140,10 @@ project(":paper") {
 
     tasks.named("modrinth") {
         dependsOn(paperJar)
+    }
+
+    // root project already syncs
+    tasks.named("modrinthSyncBody") {
+        enabled = false
     }
 }

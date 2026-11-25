@@ -6,3 +6,12 @@ author: Paulem
 website: https://paulem.net
 api-version: '1.21'
 folia-supported: true
+commands:
+  sotl:
+    description: Reloads the StandOnTheLetter configuration
+    usage: /<command> reload
+    permission: sotl.reload
+permissions:
+  sotl.reload:
+    description: Allows reloading the configuration
+    default: op

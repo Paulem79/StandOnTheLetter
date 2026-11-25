@@ -1,0 +1,20 @@
+{
+  "sotl.midnightconfig.title": "StandOnTheLetter",
+  "sotl.midnightconfig.category.round": "Manches",
+  "sotl.midnightconfig.category.area": "Zone",
+  "sotl.midnightconfig.category.letter": "Tirage",
+  "sotl.midnightconfig.category.messages": "Textes",
+  "sotl.midnightconfig.category.performance": "Performances",
+  "sotl.midnightconfig.roundIntervalSeconds": "Intervalle entre les manches (s)",
+  "sotl.midnightconfig.destructionDelaySeconds": "Délai avant destruction (s)",
+  "sotl.midnightconfig.restoreDelaySeconds": "Délai avant restauration (s)",
+  "sotl.midnightconfig.playerChunkRadius": "Rayon en chunks autour des joueurs",
+  "sotl.midnightconfig.playerHeightMargin": "Hauteur détruite au-dessus des pieds",
+  "sotl.midnightconfig.surveyDepth": "Profondeur analysée sous les pieds",
+  "sotl.midnightconfig.rarityExponent": "Bonus aux blocs rares",
+  "sotl.midnightconfig.inventoryWeightMultiplier": "Multiplicateur des blocs en inventaire",
+  "sotl.midnightconfig.spinningText": "Pendant le défilement",
+  "sotl.midnightconfig.finalText": "Lettre choisie ({seconds} = délai)",
+  "sotl.midnightconfig.destructionText": "Destruction",
+  "sotl.midnightconfig.maxMillisPerTick": "Temps maximal par tick (ms)"
+}

@@ -3,6 +3,8 @@ package net.paulem.sotl.paper;
 import net.paulem.sotl.common.SOTL;
 import net.paulem.sotl.common.wrapper.LoggerWrapper;
 import net.paulem.sotl.common.utils.AlphabetUtils;
+import net.paulem.sotl.paper.config.PaperConfig;
+import net.paulem.sotl.paper.config.ReloadCommand;
 import net.paulem.sotl.paper.logger.PaperLoggerWrapper;
 import net.paulem.sotl.paper.scheduler.PaperLetterChooseScheduler;
 import net.paulem.sotl.paper.folia.FoliaLetterChooseScheduler;
@@ -12,6 +14,7 @@ import org.bukkit.Material;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 public class PaperSOTL extends JavaPlugin implements SOTL<PaperSOTL> {
     private static final int BSTATS_ID = 34663;
@@ -25,6 +28,10 @@ public class PaperSOTL extends JavaPlugin implements SOTL<PaperSOTL> {
         logger = new PaperLoggerWrapper(getLogger());
 
         logger().info("SOTL enabled!");
+
+        PaperConfig config = new PaperConfig(this);
+        config.load();
+        Objects.requireNonNull(getCommand("sotl")).setExecutor(new ReloadCommand(config));
 
         initLetterWeights();
 

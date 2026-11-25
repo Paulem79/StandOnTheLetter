@@ -1,5 +1,5 @@
 plugins {
-    id("net.fabricmc.fabric-loom-remap") version "1.18-SNAPSHOT"
+    id("net.fabricmc.fabric-loom-remap") version "1.19.4"
     java
 }
 
@@ -17,6 +17,7 @@ dependencies {
     mappings(loom.officialMojangMappings())
     modImplementation("net.fabricmc:fabric-loader:0.20.1")
     modImplementation("net.fabricmc.fabric-api:fabric-api:0.141.6+$minecraftVersion")
+    modImplementation("maven.modrinth:midnightlib:1.10.0+$minecraftVersion-fabric")
 }
 
 tasks.withType<JavaCompile>().configureEach {

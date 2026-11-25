@@ -1,5 +1,6 @@
 package net.paulem.sotl.common.scheduler;
 
+import net.paulem.sotl.common.SOTLConfig;
 import net.paulem.sotl.common.SOTLSettings;
 import net.paulem.sotl.common.utils.AlphabetUtils;
 
@@ -37,6 +38,7 @@ public final class BlockSurvey {
      */
     public Map<Character, Double> letterWeights() {
         Map<Character, Double> weights = new HashMap<>();
+        SOTLConfig config = SOTLSettings.config();
 
         for (Map.Entry<String, Integer> entry : blockCounts.entrySet()) {
             Set<Character> initials = AlphabetUtils.initials(entry.getKey());
@@ -44,9 +46,9 @@ public final class BlockSurvey {
                 continue;
             }
 
-            double weight = 1.0 / Math.pow(entry.getValue(), SOTLSettings.RARITY_EXPONENT);
+            double weight = 1.0 / Math.pow(entry.getValue(), config.rarityExponent());
             if (inventoryBlocks.contains(entry.getKey())) {
-                weight *= SOTLSettings.INVENTORY_WEIGHT_MULTIPLIER;
+                weight *= config.inventoryWeightMultiplier();
             }
 
             double share = weight / initials.size();

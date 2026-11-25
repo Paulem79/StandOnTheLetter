@@ -1,0 +1,33 @@
+round:
+  # Seconds between two letter draws (5 to 3600).
+  interval-seconds: 60
+  # Seconds between the chosen letter and the destruction (1 to 300)
+  destruction-delay-seconds: 10
+  # Seconds between the end of the destruction and the restoration (1 to 300)
+  restore-delay-seconds: 10
+
+area:
+  # Chunks destroyed around each player (0 to 4). 1 means 3x3 chunks, 4 means 9x9: large values makes server go brr.
+  player-chunk-radius: 1
+  # Blocks above the feet of a player that are still destroyed (0 to 64)
+  player-height-margin: 2
+
+letter:
+  # Blocks below the feet of a player scanned to pick the letter (0 to 128)
+  survey-depth: 24
+  # How much rare blocks are preferred (0 to 2). 0 gives every block the same chance
+  rarity-exponent: 0.5
+  # Weight multiplier of a block a player has in their inventory (0 to 10). 1 = no bonus.
+  inventory-weight-multiplier: 1.1
+
+messages:
+  # Shown under the letters while they spin
+  spinning: "Spinning..."
+  # Shown under the chosen letter. {seconds} is replaced by destruction delay.
+  final: "Gone in {seconds}s"
+  # Shown when the destruction starts
+  destruction: "Gone!"
+
+performance:
+  # Time spent destroying or restoring blocks in one tick, in milliseconds (1 to 40)
+  max-millis-per-tick: 10

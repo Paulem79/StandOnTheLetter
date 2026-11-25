@@ -1,5 +1,6 @@
 package net.paulem.sotl.common.destruction;
 
+import net.paulem.sotl.common.SOTLSettings;
 import net.paulem.sotl.common.destruction.model.DestroyedBlock;
 import net.paulem.sotl.common.destruction.model.StoredEntity;
 import net.paulem.sotl.common.utils.AlphabetUtils;
@@ -15,8 +16,6 @@ import java.util.*;
  * @param <ME> stored entity model
  */
 public abstract class DestructionContext<W, K, MD extends DestroyedBlock, ME extends StoredEntity> {
-    public static final long DEFAULT_BUDGET_PER_TICK = 10_000_000L; // 10 ms budget per tick by default
-
     private final W world;
     private final char letter;
     private final long maxNanosPerTick;
@@ -36,7 +35,7 @@ public abstract class DestructionContext<W, K, MD extends DestroyedBlock, ME ext
     }
 
     protected DestructionContext(W world, char letter) {
-        this(world, letter, DEFAULT_BUDGET_PER_TICK);
+        this(world, letter, SOTLSettings.config().maxNanosPerTick());
     }
 
     // ---- Platform hooks ----

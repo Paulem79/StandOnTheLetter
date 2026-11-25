@@ -1,0 +1,20 @@
+{
+  "sotl.midnightconfig.title": "StandOnTheLetter",
+  "sotl.midnightconfig.category.round": "Rounds",
+  "sotl.midnightconfig.category.area": "Area",
+  "sotl.midnightconfig.category.letter": "Draw",
+  "sotl.midnightconfig.category.messages": "Messages",
+  "sotl.midnightconfig.category.performance": "Performances",
+  "sotl.midnightconfig.roundIntervalSeconds": "Time between rounds (s)",
+  "sotl.midnightconfig.destructionDelaySeconds": "Delay before destruction (s)",
+  "sotl.midnightconfig.restoreDelaySeconds": "Delay before restoration (s)",
+  "sotl.midnightconfig.playerChunkRadius": "Chunk radius around players",
+  "sotl.midnightconfig.playerHeightMargin": "Height destroyed above the feet",
+  "sotl.midnightconfig.surveyDepth": "Depth scanned below the feet",
+  "sotl.midnightconfig.rarityExponent": "Rare blocks bonus",
+  "sotl.midnightconfig.inventoryWeightMultiplier": "Inventory blocks multiplier",
+  "sotl.midnightconfig.spinningText": "While the letters spin",
+  "sotl.midnightconfig.finalText": "Letter chosen ({seconds} = delay)",
+  "sotl.midnightconfig.destructionText": "Destruction",
+  "sotl.midnightconfig.maxMillisPerTick": "Max time per tick (ms)"
+}
