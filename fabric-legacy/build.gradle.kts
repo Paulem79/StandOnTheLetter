@@ -1,5 +1,5 @@
 plugins {
-    id("net.fabricmc.fabric-loom-remap") version "1.19.4"
+    id("net.fabricmc.fabric-loom-remap") version "1.19.6"
     java
 }
 
